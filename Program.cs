@@ -20,23 +20,51 @@
 
 // На основе этого кода соберите mapper и reducer:
 
-def mapper(path):
-    with open(path, 'r') as file:
-        data = file.readlines()
+// def mapper(path):
+//     with open(path, 'r') as file:
+//         data = file.readlines()
 
-    scores = []
-    for line in data:
-        score = float(line.strip())
-        scores.append(score)
+//     scores = []
+//     for line in data:
+//         score = float(line.strip())
+//         scores.append(score)
 
-    return [(score, score) for score in scores]
+//     return [(score, score) for score in scores]
 
-def reducer(score_data1, score_data2):
-    n1, mean1, m21 = score_data1
-    n2, mean2, m22 = score_data2
+// def reducer(score_data1, score_data2):
+//     n1, mean1, m21 = score_data1
+//     n2, mean2, m22 = score_data2
 
-    n = n1 + n2
-    mean = (n1 * mean1 + n2 * mean2) / n
-    m2 = m21 + m22 + (n1 * (mean1 - mean) ** 2) + (n2 * (mean2 - mean) ** 2)
+//     n = n1 + n2
+//     mean = (n1 * mean1 + n2 * mean2) / n
+//     m2 = m21 + m22 + (n1 * (mean1 - mean) ** 2) + (n2 * (mean2 - mean) ** 2)
 
-    return n, mean, m2
+//     return n, mean, m2
+
+
+Mapper:
+
+import sys
+import json
+
+for line in sys.stdin:
+path = line.strip()
+if path.endswith('.json'):
+with open(path, 'r') as f:
+info = json.load(f)
+score = float(info['movieIMDbRating'])
+print(score, 1)
+
+Reducer:
+
+import sys
+
+n, mean, M2 = 0, 0.0, 0.0
+for line in sys.stdin:
+score, count = map(float, line.strip().split())
+n += count
+delta = score - mean
+mean += delta / n
+M2 += delta * (score - mean) * count
+
+print(mean, (M2 / n) ** 0.5)
